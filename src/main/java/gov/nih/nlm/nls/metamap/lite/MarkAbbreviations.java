@@ -44,7 +44,7 @@ public class MarkAbbreviations {
       if (token.getText().equals(target)) {
 	Entity newEntity = new Entity(entity);
 	newEntity.setText(token.getText());
-	newEntity.setStart(token.getPosition());
+	newEntity.setStart(token.getOffset());
 	newEntity.setLength(token.getText().length());
 	newEntityList.add(newEntity);
       }
@@ -59,7 +59,7 @@ public class MarkAbbreviations {
       if (token.getText().equals(target)) {
 	Entity newEntity = new Entity(entity);
 	newEntity.setText(token.getText());
-	newEntity.setStart(token.getPosition());
+	newEntity.setStart(token.getOffset());
 	newEntity.setLength(token.getText().length());
 	newEntityList.add(newEntity);
       }
@@ -119,7 +119,7 @@ public class MarkAbbreviations {
       for (Entity entity: entityList) {
     	String key = entity.getText();
     	if (abbrMap.containsKey(key)) {
-    	  logger.info("text -> " + key + " -> " + abbrMap.get(key));
+    	  logger.debug("text -> " + key + " -> " + abbrMap.get(key));
     	  if (shortFormMap.containsKey(abbrMap.get(key))) {
     	    for (AbbrInfo abbrInfo: shortFormMap.get(abbrMap.get(entity.getText()))) {
 	      System.out.println("abbrev shortForm: " + abbrInfo.shortForm); 
@@ -143,7 +143,7 @@ public class MarkAbbreviations {
     		  newEntity.setText(abbrInfo.shortForm);
     		  newEntity.setStart(location);
     		  newEntity.setLength(abbrInfo.shortForm.length());
-    		  logger.info("newEntity: " + newEntity);
+    		  logger.debug("newEntity: " + newEntity);
     		  newEntityList.add(newEntity);
     		  newEntityList.addAll(findMatches(text, newEntity));
     		}
@@ -215,9 +215,9 @@ public class MarkAbbreviations {
 	      }
 	    }
 	  }
-	  System.out.println("abbrvMap: " + shortForm + " -> " + longForm);
+	  logger.debug("abbrvMap: " + shortForm + " -> " + longForm);
 	  abbrMap.put(shortForm,longForm);
-	  System.out.println("abbrvMap: " + longForm + " -> " + shortForm);
+	  logger.debug("abbrvMap: " + longForm + " -> " + shortForm);
 	  abbrMap.put(longForm,shortForm);
 	}
       }
@@ -233,7 +233,7 @@ public class MarkAbbreviations {
       for (Entity entity: entityList) {
 	String key = entity.getText();
 	if (abbrMap.containsKey(key)) {
-	  logger.info("text -> " + key + " -> " + abbrMap.get(key));
+	  logger.debug("text -> " + key + " -> " + abbrMap.get(key));
 	  if (shortFormMap.containsKey(abbrMap.get(key))) {
 	    for (BioCAnnotation abbrAnnot: shortFormMap.get(abbrMap.get(entity.getText()))) {
 	      BioCLocation location = abbrAnnot.getLocations().get(0);
@@ -254,7 +254,7 @@ public class MarkAbbreviations {
 		  newEntity.setText(abbrAnnot.getText());
 		  newEntity.setStart(location.getOffset());
 		  newEntity.setLength(abbrAnnot.getText().length());
-		  logger.info("newEntity: " + newEntity);
+		  logger.debug("newEntity: " + newEntity);
 		  newEntityList.add(newEntity);
 		  newEntityList.addAll(findMatches(passage,newEntity));
 		}

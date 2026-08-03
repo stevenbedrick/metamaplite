@@ -4,6 +4,7 @@ package gov.nih.nlm.nls.metamap.lite.resultformats;
 
 import java.util.HashMap;
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
@@ -38,20 +39,24 @@ public class ResultFormatterRegistry {
 			      String className)
     throws ClassNotFoundException, InstantiationException, 
 	   NoSuchMethodException, IllegalAccessException
- {
-    Object classInstance = Class.forName(className).newInstance();
-    if (classInstance instanceof ResultFormatter) {
-      ResultFormatter instance = (ResultFormatter)classInstance;
-      synchronized(formatterMap) {
-	formatterMap.put(name,instance);
+  {
+    try {
+      Object classInstance = Class.forName(className).getDeclaredConstructor(null).newInstance();
+      if (classInstance instanceof ResultFormatter) {
+	ResultFormatter instance = (ResultFormatter) classInstance;
+	synchronized (formatterMap) {
+	  formatterMap.put(name, instance);
+	}
+	synchronized (descriptionMap) {
+	  descriptionMap.put(name, description);
+	}
+      } else {
+	throw new RuntimeException
+	  ("Class instance " + className + " for result formatter " + name +
+	   " does not implement the BioCResultformatter interface.");
       }
-      synchronized(descriptionMap) {
-	descriptionMap.put(name,description);
-      }
-    } else {
-      throw new RuntimeException("Class instance " + className +
-				 " for result formatter " + name +
-				 " does not implement the BioCResultformatter interface.");
+    } catch (InvocationTargetException ite) {
+      throw new RuntimeException(ite);
     }
   }
 
@@ -68,7 +73,7 @@ public class ResultFormatterRegistry {
       formatterMap.put(name, instance);
     }
     synchronized(descriptionMap) {
-      descriptionMap.put(name,description);
+      descriptionMap.put(name, description);
     }
   }
 
@@ -83,7 +88,11 @@ public class ResultFormatterRegistry {
   public static List<String> listInfo() {
     List<String> descriptionList = new ArrayList<String>();
     for (Map.Entry<String,ResultFormatter> entry: formatterMap.entrySet()) {
-      descriptionList.add(entry.getKey() + ": " + entry.getValue());
+      if (descriptionMap.get(entry.getKey()).trim() != "") {
+	descriptionList.add(entry.getKey() + ": " + descriptionMap.get(entry.getKey()));
+      } else {
+	descriptionList.add(entry.getKey());
+      }
     }
     return descriptionList;
   }
